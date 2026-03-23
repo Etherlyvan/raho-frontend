@@ -15,27 +15,17 @@ const ROLE_HOME: Record<RoleName, string> = {
   PATIENT:      "/patient/dashboard",
 };
 
-export default function RootPage() {
+export default function DashboardIndexPage() {
   const router = useRouter();
-  const { user, token, isHydrated } = useAuthStore();
+  const { user } = useAuthStore();
 
   useEffect(() => {
-    if (!isHydrated) return;
-
-    if (!token) {
-      router.replace("/login");
-      return;
-    }
-
-    if (user) {
-      // ✅ user.role sekarang bertipe RoleName (bukan unknown)
-      router.replace(ROLE_HOME[user.role]);
-    }
-  }, [user, token, isHydrated, router]);
+    if (user) router.replace(ROLE_HOME[user.role]);
+  }, [user, router]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50 dark:bg-slate-900">
-      <LoadingSpinner size="lg" label="Memuat..." />
+    <div className="flex items-center justify-center h-full">
+      <LoadingSpinner size="lg" />
     </div>
   );
 }
