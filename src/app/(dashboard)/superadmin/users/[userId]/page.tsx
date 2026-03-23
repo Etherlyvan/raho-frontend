@@ -1,42 +1,39 @@
 "use client";
-
-import { useState }            from "react";
+import { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { useQuery }            from "@tanstack/react-query";
-import { Pencil, KeyRound, Power, ArrowLeft } from "lucide-react";
-import { Button }              from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
+import { ArrowLeft, KeyRound, Pencil, Power } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Skeleton }            from "@/components/ui/skeleton";
+import { Button }       from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Skeleton }     from "@/components/ui/skeleton";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { PageHeader }          from "@/components/shared/PageHeader";
-import { BranchStatusBadge }   from "@/components/modules/branch/BranchStatusBadge";
-import { RoleBadge }           from "@/components/modules/user/RoleBadge";
+import { PageHeader }         from "@/components/shared/PageHeader";
+import { ConfirmDialog }      from "@/components/shared/ConfirmDialog";
+import { BranchStatusBadge }  from "@/components/modules/branch/BranchStatusBadge";
+import { RoleBadge }          from "@/components/modules/user/RoleBadge";
 import { ResetPasswordDialog } from "@/components/modules/user/ResetPasswordDialog";
-import { UserForm }            from "@/components/modules/user/UserForm";
-import { ConfirmDialog }       from "@/components/shared/ConfirmDialog";
-import { userApi }             from "@/lib/api/endpoints/users";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { toast }               from "sonner";
+import { UserForm }           from "@/components/modules/user/UserForm";
+import { userApi }            from "@/lib/api/endpoints/users";
 import { formatDate, getApiErrorMessage } from "@/lib/utils";
 
-export default function UserDetailPage() {
-  const { userId }  = useParams<{ userId: string }>();
-  const router      = useRouter();
-  const queryClient = useQueryClient();
+export default function SuperAdminUserDetailPage() {
+  const { userId }    = useParams<{ userId: string }>();
+  const router        = useRouter();
+  const queryClient   = useQueryClient();
 
   const [showReset,  setShowReset]  = useState(false);
   const [showToggle, setShowToggle] = useState(false);
   const [tab, setTab]               = useState<"detail" | "edit">("detail");
 
+  // ── Data ──────────────────────────────────────────────────────────
   const { data: user, isLoading } = useQuery({
     queryKey: ["users", userId],
-    queryFn:  async () => {
-      const res = await userApi.detail(userId);
-      return res.data.data;
-    },
+    queryFn:  async () => (await userApi.detail(userId)).data.data,
   });
 
+  // ── Toggle Active ─────────────────────────────────────────────────
   const toggleMutation = useMutation({
     mutationFn: () => userApi.toggleActive(userId),
     onSuccess: () => {
@@ -48,52 +45,55 @@ export default function UserDetailPage() {
     onError: (err) => toast.error(getApiErrorMessage(err, "Gagal mengubah status")),
   });
 
-  if (isLoading) {
-    return (
-      <div className="space-y-4">
-        <Skeleton className="h-10 w-64" />
-        <Skeleton className="h-48" />
-      </div>
-    );
-  }
+  // ── Loading / Guard ───────────────────────────────────────────────
+  if (isLoading) return (
+    <div className="space-y-4 max-w-2xl">
+      <Skeleton className="h-10 w-64" />
+      <Skeleton className="h-12 w-full" />
+      <Skeleton className="h-56 w-full" />
+    </div>
+  );
 
   if (!user) return null;
 
   const name     = user.profile?.fullName ?? user.email;
-  const initials = name.split(" ").slice(0, 2).map((n: string) => n[0]).join("").toUpperCase();
+  const initials = name
+    .split(" ")
+    .slice(0, 2)
+    .map((n: string) => n[0])
+    .join("")
+    .toUpperCase();
 
   return (
     <div className="space-y-6">
+      {/* ── Header ───────────────────────────────────────────────── */}
       <PageHeader title={name} description={user.email}>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm" onClick={() => router.back()}>
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Kembali
-          </Button>
-          <Button variant="outline" size="sm" onClick={() => setShowReset(true)}>
-            <KeyRound className="mr-2 h-4 w-4" />
-            Reset Password
-          </Button>
-          <Button
-            variant={user.isActive ? "destructive" : "default"}
-            size="sm"
-            onClick={() => setShowToggle(true)}
-          >
-            <Power className="mr-2 h-4 w-4" />
-            {user.isActive ? "Nonaktifkan" : "Aktifkan"}
-          </Button>
-        </div>
+        <Button variant="outline" size="sm" onClick={router.back}>
+          <ArrowLeft className="mr-2 h-4 w-4" /> Kembali
+        </Button>
+        <Button variant="outline" size="sm" onClick={() => setShowReset(true)}>
+          <KeyRound className="mr-2 h-4 w-4" /> Reset Password
+        </Button>
+        <Button
+          variant={user.isActive ? "destructive" : "default"}
+          size="sm"
+          onClick={() => setShowToggle(true)}
+        >
+          <Power className="mr-2 h-4 w-4" />
+          {user.isActive ? "Nonaktifkan" : "Aktifkan"}
+        </Button>
       </PageHeader>
 
-      <Tabs value={tab} onValueChange={(v) => setTab(v as typeof tab)}>
+      {/* ── Tabs ─────────────────────────────────────────────────── */}
+      <Tabs value={tab} onValueChange={(v) => setTab(v as "detail" | "edit")}>
         <TabsList>
           <TabsTrigger value="detail">Detail</TabsTrigger>
           <TabsTrigger value="edit">
-            <Pencil className="mr-2 h-3 w-3" />
-            Edit
+            <Pencil className="mr-2 h-3.5 w-3.5" /> Edit
           </TabsTrigger>
         </TabsList>
 
+        {/* Tab: Detail */}
         <TabsContent value="detail" className="mt-4">
           <Card>
             <CardHeader className="pb-3">
@@ -103,10 +103,13 @@ export default function UserDetailPage() {
               </div>
             </CardHeader>
             <CardContent>
+              {/* Avatar + nama + role */}
               <div className="flex items-center gap-4 mb-6">
                 <Avatar className="h-16 w-16">
                   <AvatarImage src={user.profile?.avatarUrl ?? undefined} />
-                  <AvatarFallback className="text-lg">{initials}</AvatarFallback>
+                  <AvatarFallback className="text-lg bg-slate-200 dark:bg-slate-700">
+                    {initials}
+                  </AvatarFallback>
                 </Avatar>
                 <div>
                   <p className="text-lg font-semibold text-slate-900 dark:text-white">{name}</p>
@@ -118,10 +121,12 @@ export default function UserDetailPage() {
                   </div>
                 </div>
               </div>
+
+              {/* Grid info */}
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 text-sm">
                 <div>
                   <p className="text-slate-500">Email</p>
-                  <p className="font-medium mt-0.5">{user.email}</p>
+                  <p className="font-medium mt-0.5 break-all">{user.email}</p>
                 </div>
                 <div>
                   <p className="text-slate-500">No. Telepon</p>
@@ -152,16 +157,18 @@ export default function UserDetailPage() {
           </Card>
         </TabsContent>
 
+        {/* Tab: Edit */}
         <TabsContent value="edit" className="mt-4 max-w-2xl">
           <UserForm
             mode="edit"
             initialData={user}
             userId={userId}
-            basePath="/superadmin"
+            basePath="superadmin"
           />
         </TabsContent>
       </Tabs>
 
+      {/* ── Dialogs ──────────────────────────────────────────────── */}
       <ResetPasswordDialog
         open={showReset}
         onOpenChange={setShowReset}
@@ -173,7 +180,7 @@ export default function UserDetailPage() {
         open={showToggle}
         onOpenChange={setShowToggle}
         title={user.isActive ? "Nonaktifkan Akun" : "Aktifkan Akun"}
-        description={`Yakin ingin ${user.isActive ? "menonaktifkan" : "mengaktifkan"} akun "${name}"?`}
+        description={`Yakin ingin ${user.isActive ? "menonaktifkan" : "mengaktifkan"} akun ${name}?`}
         confirmLabel={user.isActive ? "Nonaktifkan" : "Aktifkan"}
         variant={user.isActive ? "destructive" : "default"}
         onConfirm={() => toggleMutation.mutate()}

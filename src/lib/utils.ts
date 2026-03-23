@@ -10,6 +10,7 @@ import type {
   RoleName,
   SessionStatus,
 } from "@/types";
+import axios, { type AxiosError } from "axios";
 
 // ─── Tailwind class merge ──────────────────────────────────────
 
@@ -77,6 +78,7 @@ export const SESSION_STATUS_LABELS: Record<SessionStatus, string> = {
 export const INVOICE_STATUS_LABELS: Record<InvoiceStatus, string> = {
   PENDING:  "Menunggu",
   PAID:     "Lunas",
+  OVERDUE:  "Jatuh Tempo",
   REJECTED: "Ditolak",
 };
 
@@ -110,14 +112,30 @@ export function clearAllClientStorage(): void {
 
 // ─── API Error extractor ───────────────────────────────────────
 
+
 export function getApiErrorMessage(error: unknown, fallback = "Terjadi kesalahan"): string {
-  if (
-    typeof error === "object" &&
-    error !== null &&
-    "response" in error
-  ) {
-    const resp = (error as { response?: { data?: { message?: string } } }).response;
-    return resp?.data?.message ?? fallback;
+  if (axios.isAxiosError(error)) {
+    // AxiosError sudah properly typed setelah isAxiosError() guard
+    const axiosError = error as AxiosError<{ message?: string }>;
+    const status     = axiosError.response?.status;
+
+    if (status === 429) {
+      const resetTime = axiosError.response?.headers?.["ratelimit-reset"] as string | undefined;
+      if (resetTime) {
+        const secondsLeft = Math.max(0, Math.ceil(Number(resetTime) - Date.now() / 1000));
+        const minutes     = Math.ceil(secondsLeft / 60);
+        return `Terlalu banyak percobaan gagal. Coba lagi dalam ${minutes} menit.`;
+      }
+      return "Terlalu banyak percobaan gagal. Coba lagi dalam 15 menit.";
+    }
+
+    return axiosError.response?.data?.message ?? fallback;
   }
+
+  // Fallback untuk non-Axios error (Error object biasa)
+  if (error instanceof Error) {
+    return error.message || fallback;
+  }
+
   return fallback;
 }

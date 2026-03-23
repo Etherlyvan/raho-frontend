@@ -22,7 +22,7 @@ export default function MasterAdminEditBranchPage() {
     <div className="max-w-2xl space-y-6">
       <PageHeader title={`Edit — ${data.name}`} description="Perbarui informasi cabang" />
       {/* basePath masteradmin, redirect setelah edit ke /masteradmin/branches/:id */}
-      <BranchForm mode="edit" initialData={data} branchId={branchId} />
+      <BranchForm mode="edit" initialData={data} branchId={branchId} basePath="masteradmin" />
     </div>
   );
 }
