@@ -359,6 +359,7 @@ export type PackageType          = "BASIC" | "BOOSTER";
 export interface MemberPackage {
   memberPackageId: string;
   type:           PackageType;
+  packageName?: string | null
   status:         MemberPackageStatus;
   totalSessions:  number;
   usedSessions:   number;
@@ -450,3 +451,353 @@ export interface EMREntry {
   }[];
 }
 
+// ─── ENCOUNTER ───────────────────────────────────────────────────────────────
+
+export type EncounterType = 'CONSULTATION' | 'TREATMENT'
+export type PelaksanaanType = 'KLINIK' | 'HOMECARE'
+
+export interface AssessmentData {
+  eligibility: 'ELIGIBLE' | 'NOT_ELIGIBLE' | 'CONDITIONAL'
+  targetOutcome?: string
+  notes?: string
+}
+
+export interface TreatmentPlanData {
+  protocol: string
+  frequency?: string
+  totalSessions?: number
+  duration?: string
+  specialNotes?: string
+}
+
+/** Ref paket yang disematkan di dalam Encounter (field dari encounterSelect BE) */
+export interface EncounterPackageRef {
+  memberPackageId: string
+  packageType: PackageType          // ← 'packageType', BUKAN 'type'
+  packageName: string | null
+  status: MemberPackageStatus
+  usedSessions: number
+  totalSessions: number
+}
+
+export interface Encounter {
+  encounterId: string
+  type: EncounterType
+  status: EncounterStatus
+  treatmentDate: string | null
+  completedAt: string | null
+  assessment: AssessmentData | null
+  treatmentPlan: TreatmentPlanData | null
+  consultationEncounterId: string | null
+  createdAt: string
+  updatedAt: string
+  member: {
+    memberId: string
+    memberNo: string
+    fullName: string              // flat, BUKAN member.profile.fullName
+    status: MemberStatus
+  }
+  doctor: {
+    userId: string
+    staffCode: string | null
+    profile: { fullName: string; speciality: string | null } | null
+  }
+  branch: {
+    branchId: string
+    name: string
+    city: string
+    tipe: BranchType
+  }
+  memberPackage: EncounterPackageRef
+  _count: {
+    sessions: number
+    diagnoses: number
+    emrNotes: number
+  }
+}
+
+export interface CreateEncounterPayload {
+  memberId: string
+  doctorId: string
+  branchId: string
+  memberPackageId: string
+  type: EncounterType
+  consultationEncounterId?: string
+  treatmentDate?: string            // ISO 8601
+}
+
+export interface UpdateEncounterStatusPayload {
+  status: EncounterStatus
+}
+
+export interface EncounterListParams {
+  memberId?: string
+  branchId?: string
+  type?: EncounterType
+  status?: EncounterStatus
+  page?: number
+  limit?: number
+}
+
+// ─── THERAPY PLAN ─────────────────────────────────────────────────────────────
+
+export interface TherapyPlan {
+  sessionTherapyPlanId: string
+  treatmentSessionId: string
+  ifaMg: number | null
+  hhoMl: number
+  h2Ml: number | null
+  noMl: number | null
+  gasoMl: number | null
+  o2Ml: number | null
+  notes: string | null
+  plannedAt: string
+  createdAt: string
+  updatedAt: string
+  planner: {
+    userId: string
+    staffCode: string | null
+    profile: { fullName: string } | null
+  }
+}
+
+// ─── TREATMENT SESSION ────────────────────────────────────────────────────────
+
+/** Ref paket yang disematkan di dalam TreatmentSession (sessionListSelect BE) */
+export interface SessionPackageRef {
+  memberPackageId: string
+  packageType: PackageType
+  packageName: string | null
+  usedSessions: number
+  totalSessions: number
+}
+
+export interface TreatmentSession {
+  treatmentSessionId: string
+  encounterId: string
+  pelaksanaan: PelaksanaanType | null
+  infusKe: number | null
+  boosterPackageId: string | null
+  treatmentDate: string
+  nextTreatmentDate: string | null
+  startedAt: string | null
+  completedAt: string | null
+  status: SessionStatus
+  keluhanSebelum: string | null
+  keluhanSesudah: string | null
+  berhasilInfus: boolean | null
+  healingCrisis: string | null
+  createdAt: string
+  updatedAt: string
+  encounter: {
+    type: EncounterType
+    status: EncounterStatus
+    consultationEncounterId: string | null
+    member: { memberId: string; memberNo: string; fullName: string }
+    branch: { branchId: string; name: string; city: string; tipe: BranchType }
+    memberPackage: SessionPackageRef
+  }
+  nurse: {
+    userId: string
+    staffCode: string | null
+    profile: { fullName: string } | null
+  } | null
+  boosterPackage: SessionPackageRef | null
+  _count: {
+    vitalSigns: number
+    materialUsages: number
+    photos: number
+    emrNotes: number
+  }
+    invoice?: {
+    invoiceId: string
+    amount: number
+    status: InvoiceStatus
+    paidAt: string | null
+  } | null
+}
+
+export interface TreatmentSessionDetail extends TreatmentSession {
+  therapyPlan: TherapyPlan | null
+  infusionExecution: {
+    infusionExecutionId: string
+    ifaMgActual: number | null
+    hhoMlActual: number | null
+    h2MlActual: number | null
+    noMlActual: number | null
+    gasoMlActual: number | null
+    o2MlActual: number | null
+    tglProduksiCairan: string | null
+    jenisBotol: string | null
+    jenisCairan: string | null
+    volumeCarrierMl: number | null
+    jumlahPenggunaanJarum: number | null
+    deviationNote: string | null
+    filledAt: string
+    filler: {
+      userId: string
+      staffCode: string | null
+      profile: { fullName: string } | null
+    }
+  } | null
+  evaluation: {
+    doctorEvaluationId: string
+    kondisiPasien: string | null
+    progress: string | null
+    rekomendasiSesi: string | null
+    perubahanPlan: Record<string, unknown> | null
+    notes: string | null
+    createdAt: string
+    doctor: {
+      userId: string
+      staffCode: string | null
+      profile: { fullName: string } | null
+    }
+  } | null
+  vitalSigns: {
+    sessionVitalSignId: string
+    measuredAt: string | null
+    nadi: number | null
+    pi: string | null
+    tensiSistolik: number | null
+    tensiDiastolik: number | null
+  }[]
+  materialUsages: {
+    materialUsageId: string
+    quantity: number
+    unit: string
+    createdAt: string
+    item: { inventoryItemId: string; name: string; category: string }
+    inputByUser: { userId: string; profile: { fullName: string } | null }
+  }[]
+  photos: {
+    sessionPhotoId: string
+    photoUrl: string
+    fileName: string
+    caption: string | null
+    takenAt: string | null
+    takenByUser: { userId: string; profile: { fullName: string } | null }
+  }[]
+  emrNotes: {
+    emrNoteId: string
+    type: string
+    authorRole: string
+    content: Record<string, unknown>
+    createdAt: string
+    author: { userId: string; profile: { fullName: string } | null }
+  }[]
+  invoice: {
+    invoiceId: string
+    amount: number
+    status: InvoiceStatus
+    paidAt: string | null
+  } | null
+}
+
+export interface InvoiceItem {
+  name: string
+  quantity: number
+  price: number
+}
+
+export interface CreateSessionPayload {
+  encounterId: string
+  nurseId?: string
+  pelaksanaan?: PelaksanaanType
+  boosterPackageId?: string
+  treatmentDate: string             // ISO 8601
+  nextTreatmentDate?: string
+  keluhanSebelum?: string
+}
+
+export interface CompleteSessionPayload {
+  keluhanSesudah?: string
+  berhasilInfus?: boolean
+  healingCrisis?: string
+  invoiceAmount: number
+  invoiceItems: InvoiceItem[]
+  invoiceNotes?: string
+}
+
+export interface PostponeSessionPayload {
+  reason: string
+  newTreatmentDate?: string
+}
+
+export interface UpdateSessionPayload {
+  nurseId?: string
+  pelaksanaan?: PelaksanaanType
+  keluhanSebelum?: string
+  keluhanSesudah?: string
+  berhasilInfus?: boolean
+  healingCrisis?: string
+  nextTreatmentDate?: string
+}
+
+export interface SessionListParams {
+  page?: number
+  limit?: number
+  encounterId?: string
+  status?: SessionStatus
+  branchId?: string
+  nurseId?: string
+  dateFrom?: string   // ← TAMBAH
+  dateTo?: string     // ← TAMBAH
+}
+
+// ─── INVOICE ──────────────────────────────────────────────────────────────────
+
+export interface Invoice {
+  invoiceId: string
+  amount: number
+  status: InvoiceStatus
+  items: InvoiceItem[]
+  notes: string | null
+  paidAt: string | null
+  verifiedBy: string | null
+  createdAt: string
+  updatedAt: string
+  member: {
+    memberId: string
+    memberNo: string
+    fullName: string
+    phone: string | null
+  }
+  session: {
+    treatmentSessionId: string
+    infusKe: number | null
+    treatmentDate: string
+    completedAt: string | null
+    pelaksanaan: PelaksanaanType | null
+    encounter: {
+      encounterId: string
+      type: EncounterType
+      branch: { branchId: string; name: string; city: string }
+      memberPackage: { packageType: PackageType; packageName: string | null }
+    }
+  }
+  verifier: {
+    userId: string
+    staffCode: string | null
+    profile: { fullName: string } | null
+  } | null
+}
+
+export interface PayInvoicePayload {
+  paidAt?: string
+  notes?: string
+}
+
+export interface RejectInvoicePayload {
+  reason: string
+}
+
+export interface InvoiceListParams {
+  status?: InvoiceStatus
+  memberId?: string
+  branchId?: string
+  dateFrom?: string                 // ISO 8601
+  dateTo?: string
+  page?: number
+  limit?: number
+}
