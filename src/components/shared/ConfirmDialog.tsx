@@ -1,6 +1,3 @@
-"use client";
-
-import { Loader2 } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -10,52 +7,55 @@ import {
   AlertDialogFooter,
   AlertDialogHeader,
   AlertDialogTitle,
-  AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-interface ConfirmDialogProps {
-  trigger:     React.ReactNode;
-  title:       string;
-  description: string;
+export interface ConfirmDialogProps {
+  open:          boolean;                      // ✅ controlled open state
+  onOpenChange:  (open: boolean) => void;
+  title:         string;
+  description:   string;
   confirmLabel?: string;
   cancelLabel?:  string;
-  variant?:    "default" | "destructive";
-  isLoading?:  boolean;
-  onConfirm:   () => void;
+  variant?:      "default" | "destructive";
+  onConfirm:     () => void;
+  isLoading?:    boolean;
 }
 
 export function ConfirmDialog({
-  trigger,
+  open,
+  onOpenChange,
   title,
   description,
   confirmLabel = "Konfirmasi",
   cancelLabel  = "Batal",
   variant      = "default",
-  isLoading    = false,
   onConfirm,
+  isLoading    = false,
 }: ConfirmDialogProps) {
   return (
-    <AlertDialog>
-      <AlertDialogTrigger asChild>{trigger}</AlertDialogTrigger>
+    <AlertDialog open={open} onOpenChange={onOpenChange}>
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>{title}</AlertDialogTitle>
           <AlertDialogDescription>{description}</AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={isLoading}>{cancelLabel}</AlertDialogCancel>
+          <AlertDialogCancel disabled={isLoading}>
+            {cancelLabel}
+          </AlertDialogCancel>
           <AlertDialogAction
-            onClick={onConfirm}
+            onClick={(e) => {
+              e.preventDefault();
+              onConfirm();
+            }}
             disabled={isLoading}
             className={cn(
               variant === "destructive" &&
-                buttonVariants({ variant: "destructive" }),
+                "bg-red-600 hover:bg-red-700 focus:ring-red-600 dark:bg-red-700 dark:hover:bg-red-800",
             )}
           >
-            {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            {confirmLabel}
+            {isLoading ? "Memproses..." : confirmLabel}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

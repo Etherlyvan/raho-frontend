@@ -137,3 +137,126 @@ export interface UpdateProfilePayload {
   masaBerlakuStr?: string;
   speciality?:     string;
 }
+
+// ─── Branch ───────────────────────────────────────────────────
+
+export type BranchType = "KLINIK" | "HOMECARE";
+
+export interface Branch {
+  branchId:       string;
+  branchCode:     string;
+  name:           string;
+  address:        string;
+  city:           string;
+  phone:          string | null;
+  tipe:           BranchType;
+  operatingHours: string | null;
+  isActive:       boolean;
+  createdAt:      string;
+  _count: {
+    users:             number;
+    registeredMembers: number;
+    encounters:        number;
+    inventory:         number;
+  };
+}
+
+export interface BranchStats {
+  branch: {
+    branchId: string;
+    name:     string;
+    city:     string;
+    tipe:     BranchType;
+  };
+  stats: {
+    totalActiveMembers:     number;
+    activePackages:         number;
+    todaySessions:          number;
+    monthCompletedSessions: number;
+    monthRevenue:           number;
+    criticalStockCount:     number;
+    activeStaff:            number;
+  };
+}
+
+export interface CreateBranchPayload {
+  name:            string;
+  address:         string;
+  city:            string;
+  phone?:          string;
+  tipe:            BranchType;
+  operatingHours?: string;
+}
+
+export type UpdateBranchPayload = Partial<CreateBranchPayload>;
+
+export interface BranchListParams {
+  isActive?: boolean;
+  tipe?:     BranchType;
+  page?:     number;
+  limit?:    number;
+}
+
+// ─── User / Staff ─────────────────────────────────────────────
+
+export interface StaffUser {
+  userId:    string;
+  staffCode: string | null;
+  email:     string;
+  isActive:  boolean;
+  createdAt: string;
+  updatedAt: string;
+  role: {
+    name:        RoleName;
+    permissions: string[];
+  };
+  branch: {
+    branchId: string;
+    name:     string;
+  } | null;
+  profile: {
+    fullName:       string;
+    phone:          string | null;
+    avatarUrl:      string | null;
+    jenisProfesi:   ProfesiType | null;
+    strNumber:      string | null;
+    masaBerlakuStr: string | null;
+    speciality:     string | null;
+  } | null;
+}
+
+export interface CreateUserPayload {
+  email:          string;
+  password:       string;
+  role:           RoleName;
+  branchId?:      string;
+  fullName:       string;
+  phone?:         string;
+  jenisProfesi?:  ProfesiType;
+  strNumber?:     string;
+  speciality?:    string;
+}
+
+export interface UpdateUserPayload {
+  fullName?:      string;
+  phone?:         string;
+  jenisProfesi?:  ProfesiType;
+  strNumber?:     string;
+  masaBerlakuStr?: string;
+  speciality?:    string;
+  branchId?:      string;
+}
+
+export interface ResetPasswordPayload {
+  newPassword: string;
+}
+
+export interface UserListParams {
+  role?:     RoleName;
+  branchId?: string;
+  isActive?: boolean;
+  page?:     number;
+  limit?:    number;
+}
+
+

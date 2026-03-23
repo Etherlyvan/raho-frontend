@@ -1,15 +1,7 @@
-"use client";
-
 import {
-  type ColumnDef,
   flexRender,
-  getCoreRowModel,
-  getSortedRowModel,
-  type SortingState,
-  useReactTable,
+  type Table as TanstackTable,
 } from "@tanstack/react-table";
-import { useState } from "react";
-import { ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -18,94 +10,98 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Skeleton } from "@/components/ui/skeleton";
-import { EmptyState } from "./EmptyState";
+import { Skeleton }    from "@/components/ui/skeleton";
+import { EmptyState }  from "@/components/shared/EmptyState";
+import { ArrowUpDown, ArrowUp, ArrowDown } from "lucide-react";
+import { cn } from "@/lib/utils";
 
-interface DataTableProps<TData> {
-  columns:    ColumnDef<TData>[];
-  data:       TData[];
+export interface DataTableProps<TData> {
+  table:      TanstackTable<TData>;   // ✅ generic TData
   isLoading?: boolean;
-  emptyTitle?: string;
-  emptyDescription?: string;
+  skeletonRows?: number;
 }
 
 export function DataTable<TData>({
-  columns,
-  data,
-  isLoading       = false,
-  emptyTitle      = "Data kosong",
-  emptyDescription = "Belum ada data yang tersedia.",
+  table,
+  isLoading    = false,
+  skeletonRows = 8,
 }: DataTableProps<TData>) {
-  const [sorting, setSorting] = useState<SortingState>([]);
-
-  const table = useReactTable({
-    data,
-    columns,
-    getCoreRowModel:    getCoreRowModel(),
-    getSortedRowModel:  getSortedRowModel(),
-    onSortingChange:    setSorting,
-    state:              { sorting },
-  });
+  const columns     = table.getAllColumns();
+  const columnCount = columns.length;
 
   return (
-    <div className="rounded-md border border-slate-200 dark:border-slate-700 overflow-hidden">
+    <div className="rounded-lg border border-slate-200 dark:border-slate-700 overflow-hidden">
       <Table>
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (
-            <TableRow key={headerGroup.id} className="bg-slate-50 dark:bg-slate-900">
-              {headerGroup.headers.map((header) => (
-                <TableHead
-                  key={header.id}
-                  className="font-semibold text-slate-700 dark:text-slate-300 whitespace-nowrap"
-                >
-                  {header.isPlaceholder ? null : (
-                    header.column.getCanSort() ? (
-                      <button
-                        className="flex items-center gap-1 hover:text-slate-900 dark:hover:text-white"
-                        onClick={header.column.getToggleSortingHandler()}
-                      >
-                        {flexRender(header.column.columnDef.header, header.getContext())}
-                        {header.column.getIsSorted() === "asc"
-                          ? <ArrowUp   className="h-3 w-3" />
-                          : header.column.getIsSorted() === "desc"
-                          ? <ArrowDown className="h-3 w-3" />
-                          : <ArrowUpDown className="h-3 w-3 opacity-40" />
-                        }
-                      </button>
-                    ) : (
-                      flexRender(header.column.columnDef.header, header.getContext())
-                    )
-                  )}
-                </TableHead>
-              ))}
+            <TableRow
+              key={headerGroup.id}
+              className="bg-slate-50 dark:bg-slate-800/50 hover:bg-slate-50 dark:hover:bg-slate-800/50"
+            >
+              {headerGroup.headers.map((header) => {
+                const canSort = header.column.getCanSort();
+                const sorted  = header.column.getIsSorted();
+                return (
+                  <TableHead
+                    key={header.id}
+                    className={cn(
+                      "text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wide whitespace-nowrap",
+                      canSort && "cursor-pointer select-none",
+                    )}
+                    onClick={canSort ? header.column.getToggleSortingHandler() : undefined}
+                  >
+                    <div className="flex items-center gap-1.5">
+                      {header.isPlaceholder
+                        ? null
+                        : flexRender(header.column.columnDef.header, header.getContext())
+                      }
+                      {canSort && (
+                        <span className="text-slate-400">
+                          {sorted === "asc"  ? <ArrowUp   className="h-3.5 w-3.5" /> :
+                           sorted === "desc" ? <ArrowDown className="h-3.5 w-3.5" /> :
+                                              <ArrowUpDown className="h-3.5 w-3.5 opacity-40" />}
+                        </span>
+                      )}
+                    </div>
+                  </TableHead>
+                );
+              })}
             </TableRow>
           ))}
         </TableHeader>
+
         <TableBody>
           {isLoading ? (
-            Array.from({ length: 5 }).map((_, i) => (
-              <TableRow key={i}>
-                {columns.map((_, j) => (
-                  <TableCell key={j}>
-                    <Skeleton className="h-4 w-full rounded" />
+            // Skeleton rows
+            Array.from({ length: skeletonRows }).map((_, rowIdx) => (
+              <TableRow key={`skeleton-${rowIdx}`}>
+                {Array.from({ length: columnCount }).map((_, colIdx) => (
+                  <TableCell key={`skeleton-${rowIdx}-${colIdx}`}>
+                    <Skeleton className="h-4 w-full" />
                   </TableCell>
                 ))}
               </TableRow>
             ))
           ) : table.getRowModel().rows.length === 0 ? (
             <TableRow>
-              <TableCell colSpan={columns.length} className="h-48 p-0">
-                <EmptyState title={emptyTitle} description={emptyDescription} />
+              <TableCell colSpan={columnCount} className="h-48 text-center p-0">
+                <EmptyState
+                  title="Tidak ada data"
+                  description="Belum ada data yang tersedia"
+                />
               </TableCell>
             </TableRow>
           ) : (
             table.getRowModel().rows.map((row) => (
               <TableRow
                 key={row.id}
-                className="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors"
+                className="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors"
               >
                 {row.getVisibleCells().map((cell) => (
-                  <TableCell key={cell.id}>
+                  <TableCell
+                    key={cell.id}
+                    className="py-3 text-sm text-slate-700 dark:text-slate-300"
+                  >
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </TableCell>
                 ))}
