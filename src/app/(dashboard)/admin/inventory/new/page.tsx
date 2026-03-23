@@ -3,9 +3,9 @@ import { useRouter } from 'next/navigation'
 import { ArrowLeft } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { PageHeader } from '@/components/shared/PageHeader'
-import { EncounterForm } from '@/components/modules/encounter/EncounterForm'
+import { InventoryForm } from '@/components/modules/inventory/InventoryForm'
 
-export default function NewEncounterPage() {
+export default function NewInventoryPage() {
   const router = useRouter()
 
   return (
@@ -15,21 +15,18 @@ export default function NewEncounterPage() {
           variant="ghost"
           size="icon"
           className="h-8 w-8 shrink-0"
-          onClick={() => router.push('/admin/encounters')}
+          onClick={() => router.push('/admin/inventory')}
         >
           <ArrowLeft className="h-4 w-4" />
         </Button>
         <PageHeader
-          title="Buat Encounter Baru"
-          description="Jadwalkan konsultasi atau sesi treatment untuk pasien"
+          title="Tambah Item Inventori"
+          description="Daftarkan item baru ke inventori cabang"
           className="pb-0"
         />
       </div>
 
-      {/* ✅ Tidak perlu branchId prop — form baca dari store sendiri */}
-      <EncounterForm
-        onSuccess={() => router.push('/admin/encounters')}
-      />
+      <InventoryForm mode="create" />
     </div>
   )
 }

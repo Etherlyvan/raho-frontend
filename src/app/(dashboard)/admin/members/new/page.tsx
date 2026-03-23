@@ -1,10 +1,10 @@
-import { PageHeader }  from "@/components/shared/PageHeader";
-import { MemberForm }  from "@/components/modules/member/MemberForm";
-import { RoleGuard }   from "@/components/layout/RoleGuard";
+import { PageHeader } from '@/components/shared/PageHeader'
+import { MemberForm } from '@/components/modules/member/MemberForm'
+import { RoleGuard } from '@/components/layout/RoleGuard'
 
 export default function NewMemberPage() {
   return (
-    <RoleGuard roles={["ADMIN", "MASTER_ADMIN"]}>
+    <RoleGuard roles={['ADMIN', 'MASTER_ADMIN']}>
       <div className="max-w-3xl space-y-6">
         <PageHeader
           title="Daftarkan Pasien Baru"
@@ -13,5 +13,5 @@ export default function NewMemberPage() {
         <MemberForm mode="create" />
       </div>
     </RoleGuard>
-  );
+  )
 }

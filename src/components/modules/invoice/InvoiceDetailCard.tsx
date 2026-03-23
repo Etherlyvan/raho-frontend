@@ -214,7 +214,7 @@ export function InvoiceDetailCard({ invoice, basePath }: Props) {
               label="Sesi ID"
               value={
                 <Link
-                  href={`/dashboard/${basePath}/sessions/${invoice.session.treatmentSessionId}`}
+                  href={`/${basePath}/sessions/${invoice.session.treatmentSessionId}`}
                   className="font-mono text-xs text-sky-600 hover:underline dark:text-sky-400"
                 >
                   {invoice.session.treatmentSessionId.slice(0, 12)}...
@@ -263,7 +263,7 @@ export function InvoiceDetailCard({ invoice, basePath }: Props) {
                   label="Encounter"
                   value={
                     <Link
-                      href={`/dashboard/${basePath}/encounters/${invoice.session.encounter.encounterId}`}
+                      href={`/${basePath}/encounters/${invoice.session.encounter.encounterId}`}
                       className="font-mono text-xs text-sky-600 hover:underline dark:text-sky-400"
                     >
                       {invoice.session.encounter.encounterId.slice(0, 12)}...

@@ -81,7 +81,7 @@ export default function SessionDetailPage() {
           variant="ghost"
           size="icon"
           className="h-8 w-8 mt-0.5 shrink-0"
-          onClick={() => router.push('/dashboard/admin/sessions')}
+          onClick={() => router.push('/admin/sessions')}
         >
           <ArrowLeft className="h-4 w-4" />
         </Button>

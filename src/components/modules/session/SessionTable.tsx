@@ -152,7 +152,7 @@ export function SessionTable({ data, isLoading, basePath }: Props) {
               <DropdownMenuItem
                 onClick={() =>
                   router.push(
-                    `/dashboard/${basePath}/sessions/${session.treatmentSessionId}`,
+                    `/${basePath}/sessions/${session.treatmentSessionId}`,
                   )
                 }
               >
@@ -162,7 +162,7 @@ export function SessionTable({ data, isLoading, basePath }: Props) {
               <DropdownMenuItem
                 onClick={() =>
                   router.push(
-                    `/dashboard/${basePath}/encounters/${session.encounterId}`,
+                    `/${basePath}/encounters/${session.encounterId}`,
                   )
                 }
               >

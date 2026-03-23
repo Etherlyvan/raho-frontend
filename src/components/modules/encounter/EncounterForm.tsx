@@ -154,7 +154,7 @@ export function EncounterForm({ defaultBranchId, basePath }: Props) {
       toast.success('Encounter berhasil dibuat')
       queryClient.invalidateQueries({ queryKey: ['encounters'] })
       router.push(
-        `/dashboard/${basePath}/encounters/${res.data.data.encounterId}`,
+        `/${basePath}/encounters/${res.data.data.encounterId}`,
       )
     },
     onError: (err) => toast.error(getApiErrorMessage(err, 'Gagal membuat encounter')),

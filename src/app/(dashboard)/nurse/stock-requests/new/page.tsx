@@ -3,9 +3,9 @@ import { useRouter } from 'next/navigation'
 import { ArrowLeft } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { PageHeader } from '@/components/shared/PageHeader'
-import { EncounterForm } from '@/components/modules/encounter/EncounterForm'
+import { StockRequestForm } from '@/components/modules/inventory/StockRequestForm'
 
-export default function NewEncounterPage() {
+export default function NurseNewStockRequestPage() {
   const router = useRouter()
 
   return (
@@ -15,21 +15,18 @@ export default function NewEncounterPage() {
           variant="ghost"
           size="icon"
           className="h-8 w-8 shrink-0"
-          onClick={() => router.push('/admin/encounters')}
+          onClick={() => router.push('/nurse/stock-requests')}
         >
           <ArrowLeft className="h-4 w-4" />
         </Button>
         <PageHeader
-          title="Buat Encounter Baru"
-          description="Jadwalkan konsultasi atau sesi treatment untuk pasien"
+          title="Ajukan Permintaan Stok"
+          description="Kirim permintaan penambahan stok ke admin"
           className="pb-0"
         />
       </div>
 
-      {/* ✅ Tidak perlu branchId prop — form baca dari store sendiri */}
-      <EncounterForm
-        onSuccess={() => router.push('/admin/encounters')}
-      />
+      <StockRequestForm redirectPath="/nurse/stock-requests" />
     </div>
   )
 }

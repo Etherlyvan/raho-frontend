@@ -121,7 +121,7 @@ export function SessionDetailTabs({ session, activeTab, basePath }: Props) {
   const sessionLabel = `Infus ke-${session.infusKe ?? '?'} — ${session.encounter.member.fullName}`
 
   function buildTabUrl(tab: string) {
-    return `/dashboard/${basePath}/sessions/${session.treatmentSessionId}?tab=${tab}`
+    return `/${basePath}/sessions/${session.treatmentSessionId}?tab=${tab}`
   }
 
   return (
@@ -236,7 +236,7 @@ export function SessionDetailTabs({ session, activeTab, basePath }: Props) {
                 label="Encounter"
                 value={
                   <Link
-                    href={`/dashboard/${basePath}/encounters/${session.encounterId}`}
+                    href={`/${basePath}/encounters/${session.encounterId}`}
                     className="font-mono text-xs text-sky-600 hover:underline dark:text-sky-400"
                   >
                     {session.encounterId.slice(0, 12)}...
@@ -355,7 +355,7 @@ export function SessionDetailTabs({ session, activeTab, basePath }: Props) {
                 label="Invoice ID"
                 value={
                   <Link
-                    href={`/dashboard/${basePath}/invoices/${session.invoice.invoiceId}`}
+                    href={`/${basePath}/invoices/${session.invoice.invoiceId}`}
                     className="font-mono text-xs text-sky-600 hover:underline dark:text-sky-400"
                   >
                     {session.invoice.invoiceId.slice(0, 12)}...

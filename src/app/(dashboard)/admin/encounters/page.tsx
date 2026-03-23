@@ -59,7 +59,7 @@ export default function AdminEncountersPage() {
         title="Encounter"
         description="Manajemen encounter konsultasi dan treatment pasien"
       >
-        <Button onClick={() => router.push('/dashboard/admin/encounters/new')}>
+        <Button onClick={() => router.push('/admin/encounters/new')}>
           <Plus className="mr-2 h-4 w-4" />
           Buat Encounter
         </Button>

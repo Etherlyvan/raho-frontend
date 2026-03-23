@@ -88,7 +88,7 @@ export default function InvoiceDetailPage() {
           variant="ghost"
           size="icon"
           className="h-8 w-8 mt-0.5 shrink-0"
-          onClick={() => router.push('/dashboard/admin/invoices')}
+          onClick={() => router.push('/admin/invoices')}
         >
           <ArrowLeft className="h-4 w-4" />
         </Button>

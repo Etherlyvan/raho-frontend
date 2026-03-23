@@ -105,7 +105,7 @@ export default function EncounterDetailPage() {
 
   // ── Tab navigation helper ───────────────────────────────────────────────────
   function buildTabUrl(tab: string) {
-    return `/dashboard/admin/encounters/${encounterId}?tab=${tab}`
+    return `/admin/encounters/${encounterId}?tab=${tab}`
   }
 
   // ── Loading state ───────────────────────────────────────────────────────────
@@ -142,7 +142,7 @@ export default function EncounterDetailPage() {
           variant="ghost"
           size="icon"
           className="h-8 w-8"
-          onClick={() => router.push('/dashboard/admin/encounters')}
+          onClick={() => router.push('/admin/encounters')}
         >
           <ArrowLeft className="h-4 w-4" />
         </Button>
@@ -276,7 +276,7 @@ export default function EncounterDetailPage() {
                     label="Dari Konsultasi"
                     value={
                       <Link
-                        href={`/dashboard/admin/encounters/${encounter.consultationEncounterId}`}
+                        href={`/admin/encounters/${encounter.consultationEncounterId}`}
                         className="font-mono text-xs text-sky-600 hover:underline dark:text-sky-400"
                       >
                         {encounter.consultationEncounterId.slice(0, 12)}...

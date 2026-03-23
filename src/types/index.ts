@@ -801,3 +801,136 @@ export interface InvoiceListParams {
   page?: number
   limit?: number
 }
+
+// ─── Inventory ───────────────────────────────────────────────────────────────
+
+export type InventoryCategory = 'MEDICINE' | 'DEVICE' | 'CONSUMABLE'
+
+export interface InventoryItem {
+  inventoryItemId: string
+  name: string
+  category: InventoryCategory
+  unit: string
+  stock: number
+  minThreshold: number
+  location: string | null
+  isActive: boolean
+  partnershipId: string | null
+  createdAt: string
+  updatedAt: string
+  branch: {
+    branchId: string
+    name: string
+    city: string
+    tipe: BranchType
+  }
+  partnership: {
+    partnershipId: string
+    name: string
+    city: string
+  } | null
+  _count: {
+    usages: number
+    requests: number
+  }
+}
+
+// Shape khusus dari GET /inventory/alerts (raw SQL — berbeda dari inventorySelect)
+export interface InventoryAlert {
+  inventoryItemId: string
+  name: string
+  category: InventoryCategory
+  unit: string
+  stock: number
+  minThreshold: number
+  location: string | null
+  branchId: string
+}
+
+export interface AlertsResponse {
+  total: number
+  items: InventoryAlert[]
+}
+
+export interface CreateInventoryPayload {
+  name: string
+  category: InventoryCategory
+  unit: string
+  stock?: number
+  minThreshold?: number
+  location?: string
+  partnershipId?: string
+}
+
+export type UpdateInventoryPayload = Partial<
+  Omit<CreateInventoryPayload, 'stock'>
+>
+
+export interface AddStockPayload {
+  amount: number   // ← wajib "amount" sesuai addStockSchema BE
+  notes?: string
+}
+
+export interface InventoryListParams {
+  category?: InventoryCategory
+  isActive?: boolean
+  search?: string
+  branchId?: string
+  belowThreshold?: boolean
+  page?: number
+  limit?: number
+}
+
+// ─── Stock Request ────────────────────────────────────────────────────────────
+
+export type RequestStatus = 'PENDING' | 'APPROVED' | 'REJECTED' | 'FULFILLED'
+
+export interface StockRequest {
+  stockRequestId: string
+  quantity: number
+  reason: string | null
+  status: RequestStatus
+  createdAt: string
+  item: {
+    inventoryItemId: string
+    name: string
+    category: InventoryCategory
+    unit: string
+    stock: number
+    minThreshold: number
+    branch: {
+      branchId: string
+      name: string
+      city: string
+    }
+  }
+  requester: {
+    userId: string
+    staffCode: string | null
+    role: { name: RoleName }
+    profile: { fullName: string } | null
+  }
+}
+
+export interface CreateStockRequestPayload {
+  inventoryItemId: string
+  quantity: number
+  reason?: string
+}
+
+export interface StockRequestListParams {
+  inventoryItemId?: string
+  status?: RequestStatus
+  branchId?: string
+  page?: number
+  limit?: number
+}
+
+export interface RejectStockRequestPayload {
+  reason: string
+}
+
+export interface FulfillStockRequestPayload {
+  actualQuantity?: number
+  notes?: string
+}

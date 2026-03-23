@@ -117,7 +117,7 @@ export function InvoiceTable({ data, isLoading, basePath }: Props) {
             <DropdownMenuContent align="end">
               <DropdownMenuItem
                 onClick={() =>
-                  router.push(`/dashboard/${basePath}/invoices/${invoice.invoiceId}`)
+                  router.push(`/${basePath}/invoices/${invoice.invoiceId}`)
                 }
               >
                 <Eye className="mr-2 h-4 w-4" />

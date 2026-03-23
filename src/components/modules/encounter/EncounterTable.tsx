@@ -158,7 +158,7 @@ export function EncounterTable({ data, isLoading, basePath }: Props) {
             <DropdownMenuContent align="end">
               <DropdownMenuItem
                 onClick={() =>
-                  router.push(`/dashboard/${basePath}/encounters/${encounter.encounterId}`)
+                  router.push(`/${basePath}/encounters/${encounter.encounterId}`)
                 }
               >
                 <Eye className="mr-2 h-4 w-4" />
