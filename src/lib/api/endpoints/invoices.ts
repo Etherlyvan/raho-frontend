@@ -20,7 +20,7 @@ export const invoiceApi = {
   // 91 PATCH /api/invoices/:invoiceId/pay — konfirmasi pembayaran
   // BE endpoint-nya adalah /pay (BUKAN /confirm-payment seperti di member-package)
   confirmPayment: (invoiceId: string, data?: PayInvoicePayload) =>
-  api.patch<ApiResponse<Invoice>>(`invoices/${invoiceId}/confirm-payment`, data),
+  api.patch<ApiResponse<Invoice>>(`invoices/${invoiceId}/pay`, data),
 
   // 93 PATCH /api/invoices/:invoiceId/reject
   reject: (invoiceId: string, data: RejectInvoicePayload) =>

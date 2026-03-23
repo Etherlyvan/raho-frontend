@@ -776,7 +776,7 @@ export interface Invoice {
       memberPackage: { packageType: PackageType; packageName: string | null }
     }
   }
-  verifier: {
+  verifiedByUser: {
     userId: string
     staffCode: string | null
     profile: { fullName: string } | null

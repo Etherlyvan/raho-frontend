@@ -145,12 +145,16 @@ export function InvoiceDetailCard({ invoice, basePath }: Props) {
                   ) : null
                 }
               />
-              {invoice.verifier && (
-                <InfoRow
-                  label="Dikonfirmasi Oleh"
-                  value={invoice.verifier.profile?.fullName ?? invoice.verifier.staffCode ?? '-'}
-                />
-              )}
+                {invoice.status === 'PAID' && invoice.verifiedByUser && (
+                    <InfoRow
+                        label="Dikonfirmasi Oleh"
+                        value={
+                        invoice.verifiedByUser.profile?.fullName ??
+                        invoice.verifiedByUser.staffCode ??
+                        '-'
+                        }
+                    />
+                )}
             </>
           )}
           {invoice.status === 'REJECTED' && (
