@@ -593,7 +593,7 @@ export interface TreatmentSession {
     type: EncounterType
     status: EncounterStatus
     consultationEncounterId: string | null
-    member: { memberId: string; memberNo: string; fullName: string }
+    member: { memberId: string; memberNo: string; fullName: string; isConsentToPhoto: boolean; }
     branch: { branchId: string; name: string; city: string; tipe: BranchType }
     memberPackage: SessionPackageRef
   }
@@ -717,6 +717,7 @@ export interface CompleteSessionPayload {
   invoiceAmount: number
   invoiceItems: InvoiceItem[]
   invoiceNotes?: string
+  nextTreatmentDate?: string
 }
 
 export interface PostponeSessionPayload {
@@ -1091,4 +1092,159 @@ export interface UpsertAssessmentPayload {
     duration?: string;
     specialNotes?: string;
   };
+}
+
+// ─── SPRINT 7: NURSE MODULE ───────────────────────────────────────────────────
+
+// --- Tanda Vital ---
+export interface VitalSign {
+  sessionVitalSignId: string;
+  treatmentSessionId: string;
+  measuredAt: string | null;
+  nadi: number | null;
+  pi: string | null; // Decimal(5,2) diserialisasi sebagai string
+  tensiSistolik: number | null;
+  tensiDiastolik: number | null;
+}
+
+export interface CreateVitalSignPayload {
+  nadi?: number;
+  pi?: number;
+  tensiSistolik?: number;
+  tensiDiastolik?: number;
+  measuredAt?: string; // ISO 8601
+}
+
+// --- Pelaksanaan Infus Aktual ---
+export type JenisBotol = 'IFA' | 'EDTA';
+
+export interface InfusionExecution {
+  infusionExecutionId: string;
+  treatmentSessionId: string;
+  ifaMgActual: number | null;
+  hhoMlActual: number | null;
+  h2MlActual: number | null;
+  noMlActual: number | null;
+  gasoMlActual: number | null;
+  o2MlActual: number | null;
+  tglProduksiCairan: string | null;
+  jenisBotol: JenisBotol | null;
+  jenisCairan: string | null;
+  volumeCarrierMl: number | null;
+  jumlahPenggunaanJarum: number | null;
+  deviationNote: string | null;
+  filledAt: string;
+  createdAt: string;
+  updatedAt: string;
+  filler: {
+    userId: string;
+    staffCode: string | null;
+    profile: { fullName: string } | null;
+  };
+  /** Disertakan oleh BE untuk perbandingan plan vs aktual */
+  session: {
+    status: SessionStatus;
+    infusKe: number | null;
+    therapyPlan: {
+      ifaMg: number | null;
+      hhoMl: number;
+      h2Ml: number | null;
+      noMl: number | null;
+      gasoMl: number | null;
+      o2Ml: number | null;
+    } | null;
+  };
+}
+
+export interface CreateInfusionPayload {
+  ifaMgActual?: number;
+  hhoMlActual?: number;
+  h2MlActual?: number;
+  noMlActual?: number;
+  gasoMlActual?: number;
+  o2MlActual?: number;
+  tglProduksiCairan?: string;  // ISO 8601
+  jenisBotol?: JenisBotol;
+  jenisCairan?: string;
+  volumeCarrierMl?: number;
+  jumlahPenggunaanJarum?: number;
+  deviationNote?: string;
+}
+
+export type UpdateInfusionPayload = Partial<CreateInfusionPayload>;
+
+// --- Pemakaian Material ---
+export interface MaterialUsage {
+  materialUsageId: string;
+  treatmentSessionId: string;
+  quantity: number;
+  unit: string;
+  createdAt: string;
+  item: {
+    inventoryItemId: string;
+    name: string;
+    category: InventoryCategory;
+    unit: string;
+    stock: number;
+  };
+  inputByUser: {
+    userId: string;
+    staffCode: string | null;
+    profile: { fullName: string } | null;
+  };
+}
+
+export interface CreateMaterialUsagePayload {
+  inventoryItemId: string;
+  quantity: number;
+  unit: string;
+}
+
+// --- Foto Sesi ---
+export interface SessionPhoto {
+  sessionPhotoId: string;
+  treatmentSessionId: string;
+  memberId: string;
+  photoUrl: string;
+  fileName: string;
+  fileSizeBytes: number | null;
+  caption: string | null;
+  takenAt: string | null;
+  createdAt: string;
+  takenByUser: {
+    userId: string;
+    staffCode: string | null;
+    profile: { fullName: string } | null;
+  };
+}
+
+export interface CreateSessionPhotoPayload {
+  photoUrl: string;
+  fileName: string;
+  fileSizeBytes?: number;
+  caption?: string;
+  takenAt?: string; // ISO 8601
+}
+
+// --- Nurse Dashboard ---
+export interface NurseScheduleItem {
+  treatmentSessionId: string;
+  treatmentDate: string;
+  status: SessionStatus;
+  infusKe: number | null;
+  startedAt: string | null;
+  encounter: {
+    member: { fullName: string; memberNo: string };
+    branch: { name: string };
+  };
+}
+
+export interface NurseDashboard {
+  summary: {
+    todaySessions: number;
+    inProgressSessions: number;
+    criticalStockCount: number;
+    pendingStockRequests: number;
+  };
+  todaySchedule: NurseScheduleItem[];
 }
