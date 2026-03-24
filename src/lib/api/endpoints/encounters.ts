@@ -1,4 +1,6 @@
-import { api } from "@/lib/api/axios";
+// Tambahkan ke file encounters.ts yang sudah ada
+
+import {api} from "@/lib/api/axios";
 import type {
   ApiResponse,
   PaginatedResponse,
@@ -6,26 +8,29 @@ import type {
   CreateEncounterPayload,
   UpdateEncounterStatusPayload,
   EncounterListParams,
-} from '@/types'
+  UpsertAssessmentPayload,
+} from "@/types";
 
-export const encounterApi = {
-  // 37 GET /api/encounters
-  list: (params?: EncounterListParams) =>
-    api.get<PaginatedResponse<Encounter>>('encounters', { params }),
+export const encountersApi = {
+    list: (params?: EncounterListParams) =>
+    api.get<PaginatedResponse<Encounter>>("/encounters", { params }),
 
-  // POST /api/encounters
-  create: (data: CreateEncounterPayload) =>
-    api.post<ApiResponse<Encounter>>('encounters', data),
+  create: (body: CreateEncounterPayload) =>
+    api.post<ApiResponse<Encounter>>("/encounters", body),
 
-  // 39 GET /api/encounters/:encounterId
   detail: (encounterId: string) =>
-    api.get<ApiResponse<Encounter>>(`encounters/${encounterId}`),
+    api.get<ApiResponse<Encounter>>(`/encounters/${encounterId}`),
 
-  // 41 PATCH /api/encounters/:encounterId (update status)
-  updateStatus: (encounterId: string, data: UpdateEncounterStatusPayload) =>
-    api.patch<ApiResponse<Encounter>>(`encounters/${encounterId}`, data),
+  updateStatus: (encounterId: string, body: UpdateEncounterStatusPayload) =>
+    api.patch<ApiResponse<Encounter>>(`/encounters/${encounterId}`, body),
 
-  // 76 GET /api/encounters/:encounterId/summary
+  // fix Gap 9 — PUT /encounters/:id/assessment
+  upsertAssessment: (encounterId: string, body: UpsertAssessmentPayload) =>
+    api.put<ApiResponse<Encounter>>(
+      `/encounters/${encounterId}/assessment`,
+      body
+    ),
+
   summary: (encounterId: string) =>
-    api.get<ApiResponse<unknown>>(`encounters/${encounterId}/summary`),
-}
+    api.get<ApiResponse<unknown>>(`/encounters/${encounterId}/summary`),
+};

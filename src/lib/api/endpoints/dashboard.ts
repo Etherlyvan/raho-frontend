@@ -1,16 +1,9 @@
-import { api } from "@/lib/api/axios";
-import type { ApiResponse, AdminDashboard } from "@/types";
+import type { ApiResponse, AdminDashboard, DoctorDashboard } from "@/types";
+import { api } from "../axios";
 
 export const dashboardApi = {
-  admin: () =>
-    api.get<ApiResponse<AdminDashboard>>("/dashboard/admin"),
-
-  doctor: () =>
-    api.get<ApiResponse<unknown>>("/dashboard/doctor"),
-
-  nurse: () =>
-    api.get<ApiResponse<unknown>>("/dashboard/nurse"),
-
-  patient: () =>
-    api.get<ApiResponse<unknown>>("/dashboard/patient"),
+  admin: () => api.get<ApiResponse<AdminDashboard>>("/dashboard/admin"),
+  doctor: () => api.get<ApiResponse<DoctorDashboard>>("/dashboard/doctor"),
+  nurse: () => api.get<ApiResponse<any>>("/dashboard/nurse"),
+  patient: () => api.get<ApiResponse<any>>("/dashboard/patient"),
 };

@@ -23,7 +23,7 @@ import { Badge } from '@/components/ui/badge'
 import { DataTable } from '@/components/shared/DataTable'
 import { ConfirmDialog } from '@/components/shared/ConfirmDialog'
 import { EncounterStatusBadge } from '@/components/shared/StatusBadge'
-import { encounterApi } from '@/lib/api/endpoints/encounters'
+import { encountersApi } from '@/lib/api/endpoints/encounters'
 import { formatDate, getApiErrorMessage } from '@/lib/utils'
 import type { Encounter, EncounterType } from '@/types'
 
@@ -38,9 +38,9 @@ const TYPE_COLOR: Record<EncounterType, string> = {
 }
 
 interface Props {
-  data: Encounter[]
-  isLoading?: boolean
-  basePath: string  // e.g. 'admin'
+  data: Encounter[]; // <- array satu level
+  isLoading?: boolean;
+  basePath: string;
 }
 
 export function EncounterTable({ data, isLoading, basePath }: Props) {
@@ -50,7 +50,7 @@ export function EncounterTable({ data, isLoading, basePath }: Props) {
 
   const cancelMutation = useMutation({
     mutationFn: (encounterId: string) =>
-      encounterApi.updateStatus(encounterId, { status: 'CANCELLED' }),
+      encountersApi.updateStatus(encounterId, { status: 'CANCELLED' }),
     onSuccess: () => {
       toast.success('Encounter berhasil dibatalkan')
       queryClient.invalidateQueries({ queryKey: ['encounters'] })

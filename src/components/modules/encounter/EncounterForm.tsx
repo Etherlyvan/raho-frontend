@@ -26,7 +26,7 @@ import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { MemberLookupInput } from '@/components/modules/member/MemberLookupInput'
-import { encounterApi } from '@/lib/api/endpoints/encounters'
+import { encountersApi } from '@/lib/api/endpoints/encounters'
 import { memberPackageApi } from '@/lib/api/endpoints/memberPackages'
 import { userApi } from '@/lib/api/endpoints/users'
 import { getApiErrorMessage } from '@/lib/utils'
@@ -120,7 +120,7 @@ export function EncounterForm({ defaultBranchId, basePath }: Props) {
   const { data: consultations } = useQuery({
     queryKey: ['encounters', watchedMemberId, 'consultations'],
     queryFn: async () => {
-      const res = await encounterApi.list({
+      const res = await encountersApi.list({
         memberId: watchedMemberId,
         type: 'CONSULTATION',
         status: 'ONGOING',   // hanya yang sudah ada assessment
@@ -139,7 +139,7 @@ export function EncounterForm({ defaultBranchId, basePath }: Props) {
   // ── Mutation ──────────────────────────────────────────────────────────────
   const mutation = useMutation({
     mutationFn: (values: FormValues) =>
-      encounterApi.create({
+      encountersApi.create({
         memberId: values.memberId,
         doctorId: values.doctorId,
         branchId: values.branchId,
@@ -334,22 +334,24 @@ export function EncounterForm({ defaultBranchId, basePath }: Props) {
                           <SelectValue placeholder="Pilih encounter CONSULTATION" />
                         </SelectTrigger>
                       </FormControl>
-                      <SelectContent>
+                        <SelectContent>
                         {consultations?.map((enc) => (
-                          <SelectItem key={enc.encounterId} value={enc.encounterId}>
-                            {enc.encounterId.slice(0, 8)}... —{' '}
-                            {enc.doctor.profile?.fullName ?? '-'}{' '}
-                            <span className="text-xs text-slate-400">
-                              ({enc.branch.name})
-                            </span>
-                          </SelectItem>
-                        ))}
-                        {watchedMemberId && !consultations?.length && (
-                          <SelectItem value="__none__" disabled>
-                            Belum ada encounter CONSULTATION ONGOING
-                          </SelectItem>
-                        )}
-                      </SelectContent>
+                            <SelectItem key={enc.encounterId} value={enc.encounterId}>
+                                {enc.encounterId.slice(0, 8)} —{" "}
+                                {enc.doctor.profile?.fullName ?? "-"}
+                                <span className="text-xs text-slate-400">
+                                    {" "}
+                                    {enc.branch.name}
+                                </span>
+                                </SelectItem>
+                            ))}
+
+                            {watchedMemberId && !consultations?.length && (
+                                <SelectItem value="none" disabled>
+                                Belum ada encounter CONSULTATION ONGOING
+                                </SelectItem>
+                            )}
+                        </SelectContent>
                     </Select>
                     <FormDescription>
                       Hanya encounter CONSULTATION yang sudah terisi assessment yang ditampilkan.

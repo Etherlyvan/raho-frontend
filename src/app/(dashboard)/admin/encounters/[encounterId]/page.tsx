@@ -26,7 +26,7 @@ import { EncounterSummaryCard } from '@/components/modules/encounter/EncounterSu
 // Komponen berikut tersedia setelah Part 3/4 diimplementasi:
 import { SessionTable } from '@/components/modules/session/SessionTable'
 import { CreateSessionDialog } from '@/components/modules/session/CreateSessionDialog'
-import { encounterApi } from '@/lib/api/endpoints/encounters'
+import { encountersApi } from "@/lib/api/endpoints/encounters";
 import { sessionApi } from '@/lib/api/endpoints/sessions'
 import { formatDate, formatDateTime } from '@/lib/utils'
 
@@ -74,7 +74,7 @@ export default function EncounterDetailPage() {
   } = useQuery({
     queryKey: ['encounters', encounterId],
     queryFn: async () => {
-      const res = await encounterApi.detail(encounterId)
+      const res = await encountersApi.detail(encounterId)
       return res.data.data
     },
   })
@@ -83,7 +83,7 @@ export default function EncounterDetailPage() {
   const { data: summaryData, isLoading: summaryLoading } = useQuery({
     queryKey: ['encounters', encounterId, 'summary'],
     queryFn: async () => {
-      const res = await encounterApi.summary(encounterId)
+      const res = await encountersApi.summary(encounterId)
       return res.data.data as {
         sessions: { total: number; byStatus: { PLANNED: number; INPROGRESS: number; COMPLETED: number; POSTPONED: number } }
         diagnoses: { total: number }

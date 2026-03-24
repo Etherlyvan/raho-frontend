@@ -14,7 +14,7 @@ import {
 import { PageHeader } from '@/components/shared/PageHeader'
 import { Pagination } from '@/components/shared/Pagination'
 import { EncounterTable } from '@/components/modules/encounter/EncounterTable'
-import { encounterApi } from '@/lib/api/endpoints/encounters'
+import { encountersApi } from '@/lib/api/endpoints/encounters'
 import { useAuthStore } from '@/store/auth.store'
 import type { EncounterStatus, EncounterType } from '@/types'
 
@@ -32,7 +32,7 @@ export default function AdminEncountersPage() {
   const { data, isLoading } = useQuery({
     queryKey: ['encounters', page, type, status, user?.branchId],
     queryFn: async () => {
-      const res = await encounterApi.list({
+      const res = await encountersApi.list({
         page,
         limit: 15,
         branchId: user?.branchId ?? undefined,
@@ -92,11 +92,11 @@ export default function AdminEncountersPage() {
         </Select>
       </div>
 
-      <EncounterTable
-        data={data?.data ?? []}
-        isLoading={isLoading}
-        basePath="admin"
-      />
+        <EncounterTable
+            data = {data?.data ?? []}
+            isLoading={isLoading}
+            basePath="admin"
+        />
 
       {data?.meta && (
         <Pagination meta={data.meta} page={page} onPageChange={setPage} />

@@ -934,3 +934,161 @@ export interface FulfillStockRequestPayload {
   actualQuantity?: number
   notes?: string
 }
+
+// ─────────────────────────────────────────────
+// DIAGNOSIS
+// ─────────────────────────────────────────────
+export type ICDClassification = "primer" | "sekunder" | "tersier";
+
+export interface Diagnosis {
+  diagnosisId: string;
+  encounterId: string;
+  icdCode: string;
+  icdDescription: string;
+  classification: ICDClassification;
+  anamnesis: string | null;
+  physicalExam: string | null;
+  supportingExam: string | null;
+  differentialDiagnosis: string | null;
+  workingDiagnosis: string | null;
+  createdAt: string;
+  updatedAt: string;
+  createdBy: {
+    userId: string;
+    profile: { fullName: string | null };
+  };
+}
+
+export interface CreateDiagnosisPayload {
+  icdCode: string;
+  icdDescription: string;
+  classification: ICDClassification;
+  anamnesis?: string;
+  physicalExam?: string;
+  supportingExam?: string;
+  differentialDiagnosis?: string;
+  workingDiagnosis?: string;
+}
+
+export type UpdateDiagnosisPayload = Partial<CreateDiagnosisPayload>;
+
+// ─────────────────────────────────────────────
+// THERAPY PLAN
+// ─────────────────────────────────────────────
+export interface CreateTherapyPlanPayload {
+  ifaMg?: number | null;
+  hhoMl: number;
+  h2Ml?: number | null;
+  noMl?: number | null;
+  gasoMl?: number | null;
+  o2Ml?: number | null;
+  notes?: string;
+}
+
+export type UpdateTherapyPlanPayload = Partial<CreateTherapyPlanPayload>;
+
+// ─────────────────────────────────────────────
+// EVALUATION
+// ─────────────────────────────────────────────
+export type EvaluationProgress = "IMPROVING" | "STABLE" | "DECLINING";
+
+export interface PlanChange {
+  field: string;
+  from: string;
+  to: string;
+  reason: string;
+}
+
+export interface SessionEvaluation {
+  evaluationId: string;
+  treatmentSessionId: string;
+  condition: string | null;
+  progress: EvaluationProgress | null;
+  recommendation: string | null;
+  planChanges: PlanChange[];
+  createdAt: string;
+  updatedAt: string;
+  doctor: {
+    userId: string;
+    profile: { fullName: string | null };
+  };
+}
+
+export interface CreateEvaluationPayload {
+  condition?: string;
+  progress?: EvaluationProgress;
+  recommendation?: string;
+  planChanges?: PlanChange[];
+}
+
+export type UpdateEvaluationPayload = Partial<CreateEvaluationPayload>;
+
+// ─────────────────────────────────────────────
+// EMR NOTES
+// ─────────────────────────────────────────────
+export type EMRNoteType =
+  | "ASSESSMENT"
+  | "CLINICAL_NOTE"
+  | "OPERATIONAL_NOTE"
+  | "FOLLOW_UP";
+
+export interface EMRNote {
+  noteId: string;
+  type: EMRNoteType;
+  content: string;
+  createdAt: string;
+  author: {
+    userId: string;
+    role: { name: RoleName };
+    profile: { fullName: string | null };
+  };
+}
+
+export interface CreateEMRNotePayload {
+  type: EMRNoteType;
+  content: string;
+}
+
+// ─────────────────────────────────────────────
+// DOCTOR DASHBOARD
+// ─────────────────────────────────────────────
+export interface DoctorScheduleItem {
+  treatmentSessionId: string;
+  treatmentDate: string;
+  status: SessionStatus;
+  infusKe: number | null;
+  member: {
+    memberId: string;
+    memberNo: string;
+    fullName: string;
+  };
+  branch: { name: string };
+}
+
+export interface DoctorDashboard {
+  summary: {
+    todaySessions: number;
+    activeEncounters: number;
+    pendingAssessments: number;
+    evaluationRate: number; // persen
+  };
+  todaySchedule: DoctorScheduleItem[];
+}
+
+// ─────────────────────────────────────────────
+// ASSESSMENT (untuk PUT /encounters/:id/assessment)
+// ─────────────────────────────────────────────
+export type EligibilityStatus = "ELIGIBLE" | "NOT_ELIGIBLE" | "CONDITIONAL";
+
+export interface UpsertAssessmentPayload {
+  eligibility: EligibilityStatus;
+  targetOutcome?: string;
+  notes?: string;
+  treatmentPlan?: {
+    protocol: string;
+    frequency?: string;
+    totalSessions?: number;
+    duration?: string;
+    specialNotes?: string;
+  };
+}
