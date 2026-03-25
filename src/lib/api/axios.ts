@@ -49,3 +49,36 @@ api.interceptors.response.use(
     return Promise.reject(error);
   },
 );
+
+import type { AxiosRequestConfig } from 'axios';
+import type { ApiResponse, PaginatedResponse } from '@/types';
+
+// Wrapper dengan helper methods — di-import oleh semua endpoint file
+// sebagai: import api from '@/lib/api/axios'
+const apiClient = {
+  getApiResponse: <T>(url: string, config?: AxiosRequestConfig) =>
+    api.get<ApiResponse<T>>(url, config),
+
+  getPaginatedResponse: <T>(
+    url: string,
+    params?: Record<string, unknown>,
+    config?: AxiosRequestConfig,
+  ) => api.get<PaginatedResponse<T>>(url, { params, ...config }),
+
+  postApiResponse: <T>(url: string, data?: unknown, config?: AxiosRequestConfig) =>
+    api.post<ApiResponse<T>>(url, data, config),
+
+  patchApiResponse: <T>(url: string, data?: unknown, config?: AxiosRequestConfig) =>
+    api.patch<ApiResponse<T>>(url, data, config),
+
+  putApiResponse: <T>(url: string, data?: unknown, config?: AxiosRequestConfig) =>
+    api.put<ApiResponse<T>>(url, data, config),
+
+  deleteApiResponse: <T>(url: string, config?: AxiosRequestConfig) =>
+    api.delete<ApiResponse<T>>(url, config),
+
+  getBlob: (url: string, config?: AxiosRequestConfig) =>
+    api.get<Blob>(url, { responseType: 'blob', ...config }),
+};
+
+export default apiClient;

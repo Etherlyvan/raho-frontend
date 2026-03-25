@@ -46,7 +46,7 @@ export function AssignPackageForm({ memberId, onSuccess }: Props) {
 
   const mutation = useMutation({
     mutationFn: (values: FormValues) =>
-      memberPackageApi.create(memberId, {
+      memberPackageApi.assign(memberId, {
         type:      values.type,
         startDate: values.startDate
           ? new Date(values.startDate).toISOString()

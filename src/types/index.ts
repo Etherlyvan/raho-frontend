@@ -794,13 +794,14 @@ export interface RejectInvoicePayload {
 }
 
 export interface InvoiceListParams {
-  status?: InvoiceStatus
-  memberId?: string
-  branchId?: string
-  dateFrom?: string                 // ISO 8601
-  dateTo?: string
-  page?: number
-  limit?: number
+  [key: string]: unknown; // ← tambahkan ini
+  status?: InvoiceStatus;
+  memberId?: string;
+  branchId?: string;
+  dateFrom?: string;
+  dateTo?: string;
+  page?: number;
+  limit?: number;
 }
 
 // ─── Inventory ───────────────────────────────────────────────────────────────
@@ -1247,4 +1248,55 @@ export interface NurseDashboard {
     pendingStockRequests: number;
   };
   todaySchedule: NurseScheduleItem[];
+}
+// ============================================================
+// SPRINT 8 – PATIENT DASHBOARD
+// ============================================================
+
+export interface PatientActivePackage {
+  memberPackageId: string;
+  packageType: PackageType;
+  packageName: string | null;
+  totalSessions: number;
+  usedSessions: number;
+  expiredAt: string | null; // ISO 8601
+  remainingSessions: number; // dihitung BE: totalSessions - usedSessions
+  branch: {
+    name: string;
+    city?: string;
+  };
+}
+
+export interface PatientNextSession {
+  treatmentSessionId: string;
+  treatmentDate: string;
+  infusKe: number | null;
+  pelaksanaan: PelaksanaanType | null;
+  encounter: {
+    branch: { name: string; city: string };
+    memberPackage: { packageName: string | null; packageType: PackageType };
+  };
+}
+
+export interface PatientRecentInvoice {
+  invoiceId: string;
+  amount: number;
+  status: InvoiceStatus;
+  paidAt: string | null;
+  createdAt: string;
+}
+
+export interface PatientDashboard {
+  member: {
+    memberId: string;
+    fullName: string;
+    memberNo: string;
+  };
+  summary: {
+    activePackageCount: number;
+    pendingInvoiceCount: number;
+    nextSession: PatientNextSession | null;
+  };
+  activePackages: PatientActivePackage[];
+  recentInvoices: PatientRecentInvoice[];
 }

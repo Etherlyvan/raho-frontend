@@ -1,154 +1,106 @@
-'use client'
-import { useState } from 'react'
-import { useQuery } from '@tanstack/react-query'
+'use client';
+
+import { useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { PageHeader }   from '@/components/shared/PageHeader';
+import { Pagination }   from '@/components/shared/Pagination';
+import { ErrorMessage } from '@/components/shared/ErrorMessage';
+import { InvoiceTable } from '@/components/modules/invoice/InvoiceTable';
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@/components/ui/select'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Button } from '@/components/ui/button'
-import { X } from 'lucide-react'
-import { PageHeader } from '@/components/shared/PageHeader'
-import { Pagination } from '@/components/shared/Pagination'
-import { InvoiceTable } from '@/components/modules/invoice/InvoiceTable'
-import { invoiceApi } from '@/lib/api/endpoints/invoices'
-import { useAuthStore } from '@/store/auth.store'
-import type { InvoiceStatus } from '@/types'
+} from '@/components/ui/select';
+import { invoicesApi }    from '@/lib/api/endpoints/invoices';
+import { useAuthStore }   from '@/store/auth.store';
+import { INVOICE_STATUS_LABELS } from '@/lib/utils';
+import type { Invoice, InvoiceStatus, PaginatedResponse } from '@/types';
 
-type StatusFilter = InvoiceStatus | 'ALL'
+// ─── Filter type ─────────────────────────────────────────────────────────────
+
+type StatusFilter = InvoiceStatus | 'ALL';
 
 const STATUS_OPTIONS: { value: StatusFilter; label: string }[] = [
-  { value: 'ALL', label: 'Semua Status' },
-  { value: 'PENDING', label: 'Pending' },
-  { value: 'PAID', label: 'Lunas' },
-  { value: 'OVERDUE', label: 'Overdue' },
-  { value: 'REJECTED', label: 'Ditolak' },
-]
+  { value: 'ALL',      label: 'Semua Status' },
+  { value: 'PENDING',  label: INVOICE_STATUS_LABELS['PENDING']  },
+  { value: 'PAID',     label: INVOICE_STATUS_LABELS['PAID']     },
+  { value: 'OVERDUE',  label: INVOICE_STATUS_LABELS['OVERDUE']  },
+  { value: 'REJECTED', label: INVOICE_STATUS_LABELS['REJECTED'] },
+];
+
+// ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default function AdminInvoicesPage() {
-  // ✅ selector — mengambil AppUser | null, bukan seluruh AuthState
-  const user = useAuthStore((state) => state.user)
+  const user = useAuthStore((s) => s.user);
 
-  const [page, setPage] = useState(1)
-  const [status, setStatus] = useState<StatusFilter>('ALL')
-  const [dateFrom, setDateFrom] = useState('')
-  const [dateTo, setDateTo] = useState('')
+  const [page,   setPage]   = useState(1);
+  const [status, setStatus] = useState<StatusFilter>('ALL');
 
-  const { data, isLoading } = useQuery({
-    queryKey: ['invoices', page, status, dateFrom, dateTo, user?.branchId],
+  const { data, isLoading, isError } = useQuery<PaginatedResponse<Invoice>>({
+    queryKey: ['invoices', page, status, user?.branchId],
     queryFn: async () => {
-      const res = await invoiceApi.list({
-        page,
-        limit: 15,
+      const res = await invoicesApi.list({
+        status:   status !== 'ALL' ? status : undefined,
         branchId: user?.branchId ?? undefined,
-        status: status !== 'ALL' ? status : undefined,
-        dateFrom: dateFrom || undefined,
-        dateTo: dateTo || undefined,
-      })
-      return res.data
+        page,
+        limit:    15,
+      } as Record<string, unknown>);
+      return res.data as unknown as PaginatedResponse<Invoice>; // ← cast
     },
-  })
+    enabled: !!user,
+    placeholderData: (prev) => prev,
+  });
 
-  function handleStatusChange(v: string) {
-    setStatus(v as StatusFilter)
-    setPage(1)
+  function handleStatusChange(value: string) {
+    setStatus(value as StatusFilter);
+    setPage(1);
   }
-
-  function clearDateFilter() {
-    setDateFrom('')
-    setDateTo('')
-    setPage(1)
-  }
-
-  const hasDateFilter = dateFrom || dateTo
 
   return (
     <div className="space-y-6">
       <PageHeader
         title="Invoice"
-        description="Manajemen tagihan sesi treatment pasien"
+        description="Daftar seluruh invoice treatment pasien di cabang ini."
       />
 
-      <div className="flex flex-wrap items-end gap-3">
-        <div className="space-y-1">
-          <Label className="text-xs text-slate-500">Status</Label>
-          <Select value={status} onValueChange={handleStatusChange}>
-            <SelectTrigger className="w-44">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {STATUS_OPTIONS.map((opt) => (
-                <SelectItem key={opt.value} value={opt.value}>
-                  {opt.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div className="space-y-1">
-          <Label className="text-xs text-slate-500">Dari Tanggal</Label>
-          <Input
-            type="date"
-            value={dateFrom}
-            onChange={(e) => { setDateFrom(e.target.value); setPage(1) }}
-            className="w-40"
-          />
-        </div>
-
-        <div className="space-y-1">
-          <Label className="text-xs text-slate-500">Sampai Tanggal</Label>
-          <Input
-            type="date"
-            value={dateTo}
-            min={dateFrom || undefined}
-            onChange={(e) => { setDateTo(e.target.value); setPage(1) }}
-            className="w-40"
-          />
-        </div>
-
-        {hasDateFilter && (
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={clearDateFilter}
-            className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-300"
-          >
-            <X className="mr-1.5 h-3.5 w-3.5" />
-            Reset Tanggal
-          </Button>
-        )}
+      {/* ── Filter ─────────────────────────────────────────────────────────── */}
+      <div className="flex flex-wrap items-center gap-3">
+        <Select value={status} onValueChange={handleStatusChange}>
+          <SelectTrigger className="w-44">
+            <SelectValue placeholder="Filter status" />
+          </SelectTrigger>
+          <SelectContent>
+            {STATUS_OPTIONS.map((opt) => (
+              <SelectItem key={opt.value} value={opt.value}>
+                {opt.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
-      {data && (
-        <p className="text-sm text-slate-500 dark:text-slate-400">
-          Menampilkan{' '}
-          <span className="font-medium text-slate-700 dark:text-slate-300">
-            {data.data.length}
-          </span>{' '}
-          dari{' '}
-          <span className="font-medium text-slate-700 dark:text-slate-300">
-            {data.meta.total}
-          </span>{' '}
-          invoice
-          {status !== 'ALL' &&
-            ` · filter: ${STATUS_OPTIONS.find((o) => o.value === status)?.label}`}
-        </p>
+      {/* ── Error ──────────────────────────────────────────────────────────── */}
+      {isError && (
+        <ErrorMessage message="Gagal memuat data invoice. Silakan muat ulang halaman." />
       )}
 
+      {/* ── Table ──────────────────────────────────────────────────────────── */}
       <InvoiceTable
         data={data?.data ?? []}
         isLoading={isLoading}
-        basePath="admin"
+        basePath="/admin"
       />
 
+      {/* ── Pagination ─────────────────────────────────────────────────────── */}
       {data?.meta && (
-        <Pagination meta={data.meta} page={page} onPageChange={setPage} />
+        <Pagination
+          meta={data.meta}
+          page={page}
+          onPageChange={setPage}
+        />
       )}
     </div>
-  )
+  );
 }
