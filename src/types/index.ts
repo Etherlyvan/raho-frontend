@@ -252,11 +252,12 @@ export interface ResetPasswordPayload {
 }
 
 export interface UserListParams {
-  role?:     RoleName;
-  branchId?: string;
-  isActive?: boolean;
-  page?:     number;
-  limit?:    number;
+  role?:     RoleName
+  branchId?: string
+  isActive?: boolean
+  search?:   string
+  page?:     number
+  limit?:    number
 }
 
 // ─── Dashboard Admin ──────────────────────────────────────────
@@ -1299,4 +1300,206 @@ export interface PatientDashboard {
   };
   activePackages: PatientActivePackage[];
   recentInvoices: PatientRecentInvoice[];
+}
+
+
+// ─────────────────────────────────────────────────────────────────────────────
+// SPRINT 9 — NOTIFICATION & CHAT
+// ─────────────────────────────────────────────────────────────────────────────
+
+// ── Notifikasi ────────────────────────────────────────────────────────────────
+
+export interface Notification {
+  notificationId: string
+  title: string
+  body: string
+  type: string
+  isRead: boolean
+  resourceId: string | null
+  resourceType: string | null
+  createdAt: string
+}
+
+export interface NotificationListParams {
+  isRead?: boolean
+  type?: string
+  page?: number
+  limit?: number
+}
+
+// ── Chat Room ─────────────────────────────────────────────────────────────────
+
+export interface ChatRoomParticipant {
+  userId: string
+  staffCode: string | null
+  profile: {
+    fullName: string | null
+    avatarUrl: string | null
+  } | null
+}
+
+export interface ChatMessage {
+  chatMessageId: string
+  content: string | null
+  fileUrl: string | null
+  fileType: string | null
+  createdAt: string
+  sender: {
+    userId: string
+    staffCode: string | null
+    profile: { fullName: string | null; avatarUrl: string | null } | null
+  }
+}
+
+export interface ChatRoom {
+  chatRoomId: string
+  participants: string[]
+  createdAt: string
+  _count: { messages: number }
+  lastMessage: ChatMessage | null
+}
+
+export interface CreateChatRoomPayload {
+  participants: string[]
+}
+
+export interface SendMessagePayload {
+  content?: string
+  fileUrl?: string
+  fileType?: string
+}
+
+export interface MessageListParams {
+  page?: number
+  limit?: number
+}
+// ─────────────────────────────────────────────────────────────────────────────
+// SPRINT 10 — REPORTS & AUDIT LOG
+// ─────────────────────────────────────────────────────────────────────────────
+
+// ── Report Filter Params ──────────────────────────────────────────────────────
+
+export type ReportGroupBy = 'day' | 'week' | 'month'
+
+export interface ReportBaseParams {
+  dateFrom?:  string   // ISO date string YYYY-MM-DD
+  dateTo?:    string
+  branchId?:  string
+  groupBy?:   ReportGroupBy
+}
+
+// ── Revenue Report (EP-108) ───────────────────────────────────────────────────
+
+export interface RevenueReportItem {
+  period:         string   // Label periode, format tergantung groupBy
+  totalRevenue:   number
+  invoiceCount:   number
+  paidCount:      number
+}
+
+export interface RevenueReport {
+  summary: {
+    totalRevenue:   number
+    totalInvoices:  number
+    averagePerSession: number
+  }
+  data: RevenueReportItem[]
+}
+
+// ── Treatment Report (EP-109) ─────────────────────────────────────────────────
+
+export interface TreatmentReportItem {
+  period:            string
+  totalSessions:     number
+  completedSessions: number
+  postponedSessions: number
+  completionRate:    number
+}
+
+export interface TreatmentReport {
+  summary: {
+    totalSessions:     number
+    completedSessions: number
+    postponedSessions: number
+    completionRate:    number
+    totalEncounters:   number
+  }
+  data: TreatmentReportItem[]
+}
+
+// ── Inventory Report (EP-110) ─────────────────────────────────────────────────
+
+export interface InventoryReportItem {
+  inventoryItemId: string
+  name:            string
+  category:        string
+  unit:            string
+  totalUsed:       number
+  currentStock:    number
+  minThreshold:    number
+  isCritical:      boolean
+}
+
+export interface InventoryReport {
+  summary: {
+    totalItems:     number
+    criticalItems:  number
+    totalUsage:     number
+  }
+  data: InventoryReportItem[]
+}
+
+// ── Staff KPI Report (EP-111) ─────────────────────────────────────────────────
+
+export interface StaffKpiItem {
+  userId:          string
+  staffCode:       string | null
+  fullName:        string | null
+  role:            string
+  totalSessions:   number
+  completedSessions: number
+  evaluationCount: number   // Dokter: jumlah evaluasi; Perawat: EMR notes
+  avgSessionsPerDay: number
+}
+
+export interface StaffKpiReport {
+  period: { dateFrom: string; dateTo: string }
+  data:   StaffKpiItem[]
+}
+
+// ── Export Params (EP-112) ────────────────────────────────────────────────────
+
+export type ReportExportType = 'revenue' | 'treatment' | 'inventory' | 'staff-kpi'
+
+export interface ExportParams extends ReportBaseParams {
+  type: ReportExportType
+}
+
+// ── Audit Log (EP-113) ────────────────────────────────────────────────────────
+
+export interface AuditLog {
+  auditLogId:  string
+  action:      string
+  resource:    string
+  resourceId:  string | null
+  meta:        Record<string, unknown> | null
+  createdAt:   string
+  user: {
+    userId:    string
+    staffCode: string | null
+    email:     string
+    profile: {
+      fullName: string | null
+    } | null
+  }
+}
+
+export interface AuditLogListParams {
+  userId?:    string
+  action?:    string
+  resource?:  string
+  dateFrom?:  string
+  dateTo?:    string
+  page?:      number
+  limit?:     number
 }

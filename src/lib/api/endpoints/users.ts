@@ -11,6 +11,7 @@ import type {
 
 export const userApi = {
   list: (params?: UserListParams) =>
+    
     api.get<PaginatedResponse<StaffUser>>("/users", { params }),
 
   create: (data: CreateUserPayload) =>
